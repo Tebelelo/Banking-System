@@ -1,16 +1,18 @@
-# Use Maven to build the app
+# ------------ Build Stage ------------
 FROM maven:3.9.5-eclipse-temurin-17 AS build
 WORKDIR /app
 COPY . .
 RUN mvn clean package -DskipTests
 
-# Use a minimal JRE image to run the app
+# ------------ Runtime Stage ------------
 FROM eclipse-temurin:17-jre
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
 
-# Expose port 8080 (Render will map it dynamically)
+# Copy only the JAR (adjust the name if needed)
+COPY --from=build /app/target/Bank-0.0.1-SNAPSHOT.jar app.jar
+
+# Expose the port (Render uses PORT env)
 EXPOSE 8080
 
-# Run the Spring Boot app
+# Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
